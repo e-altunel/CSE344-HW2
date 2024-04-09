@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 1
 
 #include <signal.h>
+#include <stdlib.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -50,18 +51,31 @@ void sigchld_handler (int signal) {
 }
 
 int parent (int write_fd1, int write_fd2) {
+
+  // Set up signal handler for SIGCHLD
   struct sigaction sa;
   sa.sa_handler = sigchld_handler;
   sigemptyset (&sa.sa_mask);
   sigaction (SIGCHLD, &sa, NULL);
 
-  process_safe_write (write_fd1, "Hello from parent.");
-  process_safe_write (write_fd2, "Hello from parent.");
+  // Write to children
+  int number_count = 10;
+  srand (time (NULL));
+  while (number_count > 0) {
+    int temp = rand () % 100;
+    process_safe_write (1, "Parent sending %d\n", temp);
+    process_safe_write (write_fd1, "%d\n", temp);
+    process_safe_write (write_fd2, "%d\n", temp);
+    number_count--;
+  }
   close (write_fd1);
   close (write_fd2);
+  int seconds = 0;
   while (child_count > 0) {
-    process_safe_write (1, "[%d]Waiting for children to finish\n", child_count);
+    process_safe_write (1, "Waiting for children to finish, waited %d seconds, %d children remaining\n",
+                        seconds, child_count);
     sleep (2);
+    seconds += 2;
   }
   process_safe_write (1, "Parent exiting\n");
   return 0;
