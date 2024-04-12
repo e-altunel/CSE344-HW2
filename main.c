@@ -1,36 +1,37 @@
-
-
+#include <macros.h>
 #include <process_jobs.h>
+#include <signal.h>
 #include <unistd.h>
 #include <write.h>
 
-int main () {
-  int first_pipe[2];
-  int second_pipe[2];
-  int pid[2];
+int main(int argc, char* argv[]) {
+  if (argc != 1 && argc != 2) {
+    process_safe_write(2,
+                       "Usage: %s [0 < number of random numbers < 10]\nDefault "
+                       "number of random numbers is 5\n",
+                       argv[0]);
+    return 1;
+  }
+  int numberOfRandomNumbers = argc == 1 ? 5 : str2uint(argv[1]);
+  ASSERT(numberOfRandomNumbers > 0 && numberOfRandomNumbers < 10,
+         "Number of random numbers must be between 0 and 10\n", 1);
 
-  (void)!pipe (first_pipe);
-  (void)!pipe (second_pipe);
+  ASSERT(open_fifos() == 0, "Error opening fifos\n", 1);
+  int pid[2] = {0, 0};
 
-  pid[0] = fork ();
-
-  if (pid[0] == 0) {
-    close (first_pipe[1]);
-    close (second_pipe[0]);
-    return first_child (first_pipe[0], second_pipe[1]);
+  if ((pid[0] = fork()) == 0) {
+    ASSERT(first_child() == 0, "Error in first child\n", 2);
+  } else if ((pid[1] = fork()) == 0) {
+    ASSERT(second_child() == 0, "Error in second child\n", 2);
+  } else if (pid[0] == -1 || pid[1] == -1) {
+    process_safe_write(2, "Error forking\n");
+    ASSERT(unlink_fifos() == 0, "Error unlinking fifos\n", 2);
+  } else {
+    if (parent(numberOfRandomNumbers) == -1) {
+      process_safe_write(2, "Error in parent\n");
+      ASSERT(unlink_fifos() == 0, "Error unlinking fifos\n", 2);
+    }
   }
 
-  pid[1] = fork ();
-
-  if (pid[1] == 0) {
-    close (first_pipe[0]);
-    close (first_pipe[1]);
-    close (second_pipe[1]);
-    return second_child (second_pipe[0]);
-  }
-
-  close (first_pipe[0]);
-  close (second_pipe[0]);
-
-  return parent (first_pipe[1], second_pipe[1]);
+  return 0;
 }

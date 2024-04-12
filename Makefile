@@ -49,7 +49,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(INC)
 
 clean:
 	@echo "\033[1;31mCleaning...\033[0m"
-	@rm -rf $(OBJDIR) $(DOBJDIR) $(LIBDIR) $(BINDIR) $(TESTBINDIR) $(TESTOBJDIR) $(OBJDIR)/$(NAME).o *.out *.i .vscode
+	@rm -rf $(OBJDIR) $(DOBJDIR) $(LIBDIR) $(BINDIR) $(TESTBINDIR) $(TESTOBJDIR) $(OBJDIR)/$(NAME).o *.out *.i .vscode fifo1 fifo2
 
 re: clean all
 
