@@ -3,6 +3,9 @@ TESTCC = g++
 RELEASE_FLAGS = -O2 -Wall -Wextra -Werror -std=c99 -pedantic -DNDEBUG
 AR = ar
 ARFLAGS = rcs
+MEMCHECK = valgrind
+MEMCHECKFLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes -q --trace-children=yes
+
 
 SRCDIR = src
 OBJDIR = obj
@@ -26,6 +29,10 @@ all: $(TARGET_PATH) $(NAME_PATH)
 run: all
 	@echo "\033[1;32mRunning...\033[0m"
 	@./$(NAME_PATH)
+
+memcheck: all
+	@echo "\033[1;32mRunning with memory check...\033[0m"
+	@$(MEMCHECK) $(MEMCHECKFLAGS) ./$(NAME_PATH)
 
 $(TARGET_PATH): $(OBJ)
 	@mkdir -p $(LIBDIR)
