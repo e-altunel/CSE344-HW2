@@ -78,11 +78,12 @@ int clear_all() {
  */
 static void term_handler(int signal) {
   clear_all();
-  process_safe_write(1, "%s with PID %d received termination signal %s\n",
-                     child_number == 0   ? PARENT_NAME
-                     : child_number == 1 ? FIRST_CHILD_NAME
-                                         : SECOND_CHILD_NAME,
-                     getpid(), get_signal_name(signal));
+  process_safe_write(
+      1, "%s with PID %d received termination signal %s\n",
+      child_number == 0
+          ? PARENT_NAME
+          : (child_number == 1 ? FIRST_CHILD_NAME : SECOND_CHILD_NAME),
+      getpid(), get_signal_name(signal));
   if (child_number != 0) exit(SELF_EXIT);
   process_safe_write(1, "%s Killing remaining children\n", PARENT_NAME);
   kill_children();
@@ -365,6 +366,7 @@ int parent(int numberOfRandomNumbers) {
   ASSERT_GOTO(sigaction(SIGPIPE, &sa2, NULL) != -1, PARENT_NAME,
               "Error setting signal handler\n", Error_3);
 
+  ASSERT_GOTO(0, PARENT_NAME, "Fake error\n", Error_3);
   /**
    * @brief Open the fifo1 and fifo2
    * 

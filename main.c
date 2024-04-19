@@ -59,11 +59,11 @@ void sigchld_handler(int signal) {
         int status_remaining;
         while (waitpid(-1, &status_remaining, 0) > 0)
           ;
-        unlink_fifos();
-        clear_all();
-        process_safe_write(1, "%s Exiting due to error\n", PARENT_NAME);
-        exit(0);
       }
+      unlink_fifos();
+      clear_all();
+      process_safe_write(1, "%s Exiting due to error\n", PARENT_NAME);
+      exit(0);
     }
   }
 }
@@ -77,8 +77,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   int numberOfRandomNumbers = argc == 1 ? 5 : str2uint(argv[1]);
-  ASSERT(numberOfRandomNumbers > 0 && numberOfRandomNumbers < 10, PARENT_NAME,
-         " Number of random numbers must be between 0 and 10\n", 1);
+  ASSERT(numberOfRandomNumbers > 0 && numberOfRandomNumbers < 11, PARENT_NAME,
+         " Number of random numbers must be between 0 and 11\n", 1);
 
   ASSERT(open_fifos() == 0, PARENT_NAME, "Error opening fifos\n", 1);
 

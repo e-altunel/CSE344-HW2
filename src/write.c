@@ -13,8 +13,11 @@ void write_char(char* buffer, char c, int* index, int len) {
 }
 
 void write_string(char* buffer, const char* str, int* index, int len) {
-  if (*index + strlen(str) < len) return;
-  strlcpy(buffer + *index, str, len - *index);
+  if (*index + (int)strlen(str) < len) {
+    for (size_t i = 0; i < strlen(str); i++) {
+      buffer[(*index)++] = str[i];
+    }
+  }
 }
 
 /**
@@ -67,12 +70,12 @@ void write_style(char* buffer, style_t style, int* index, int len) {
 void process_safe_write(int fd, const char* format, ...) {
   va_list args;
   va_start(args, format);
-  int index    = 0;
-  int is_style = 0;
-  char buffer[BUFFER_SIZE];
+  int  index                   = 0;
+  int  is_style                = 0;
+  char buffer[BUFFER_SIZE + 1] = {0};
 
-  int* array     = 0;
-  int array_size = 0;
+  int* array      = 0;
+  int  array_size = 0;
   while (*format != '\0') {
     if (*format == '%') {
       format++;
